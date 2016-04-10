@@ -116,17 +116,17 @@ int bsign(bvec i) { switch (i) { case e_31: return -1; default: return 1; } }
 
 //takes two basis multivectors, finds sign of the inversions
 int invSign(bvec l, bvec r) {
-	bvec lCurr = msb(l), n = lsb(l);
-	bvec r_l = lsb(r), m = msb(r);
-	if (!lCurr || !r_l)
+	bvec lCurrBit = msb(l), l_leftmost = lsb(l);//lCurrBit starts at l_rightmost, goes to l_leftmost
+	bvec r_leftmost = lsb(r), r_rightmost = msb(r);//rCurrBit starts at r_leftmost, goes to r_rightmost
+	if (!lCurrBit || !r_leftmost)
 		return 1;
 	
 	int numInv = 0;
-	for (; lCurr >= n; lCurr >>= 1) {
-		if (!(l & lCurr))
+	for (; lCurrBit >= l_leftmost; lCurrBit >>= 1) {
+		if (!(l & lCurrBit))
 			continue;
-		for (bvec rCurr = r_l; rCurr < lCurr && rCurr <= m; rCurr <<= 1) {
-			if (!(r & rCurr))
+		for (bvec rCurrBit = r_leftmost; rCurrBit < lCurrBit && rCurrBit <= r_rightmost; rCurrBit <<= 1) {
+			if (!(r & rCurrBit))
 				continue;
 			++numInv;
 		}
