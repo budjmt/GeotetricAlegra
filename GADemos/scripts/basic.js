@@ -5,7 +5,6 @@ if ( !Detector.webgl ) Detector.addGetWebGLMessage();
 var canvas;
 var camera, scene, renderer;
 var uniforms, clock;
-var ui;
 
 function width()  { return window.innerWidth  * 0.8; }
 function height() { return window.innerHeight * 0.8; }
@@ -18,7 +17,6 @@ function render() {
     uniforms.time.value += dt;
     
     renderer.render(scene, camera);
-    ui.render();
 }
 
 function resize() {
