@@ -28,14 +28,14 @@ canvas {
 	
 	padding: 30px 0px;
 	width: 50%;
-	min-height: 100px;
+	min-height: 150px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	
 	transition: all 0.5s;
 	position: absolute;
-	bottom: 50px;
+	bottom: 70px;
 	left: 0px; right: 0px;
 	margin: 0px auto;
 	z-index: 1;
@@ -55,6 +55,7 @@ canvas {
 	margin-bottom: 50px;
 	position: relative;
 	bottom: 0px;
+    min-height: 100px;
 	z-index: 0;
 }
 

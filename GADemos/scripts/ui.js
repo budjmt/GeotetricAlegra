@@ -11,7 +11,6 @@ var TextBox = function(text) {
     this.element = undefined;
     this.event = undefined;
 };
-Object.seal(TextBox);
 
 TextBox.prototype.display = function() {
     this.element.innerHTML = this.text;
@@ -26,7 +25,8 @@ TextBox.prototype.hide = function() {
 TextBox.prototype.progress = function() {
     if(this.menu) this.menu.hide();
 	else this.hide();
-	this.next.element.onclick = this.next.progress ? this.next.progress.bind(this.next) : undefined;
+	this.next.element.onclick = this.next.progress ? 
+        this.next.progress.bind(this.next) : undefined;
     this.next.display();
     return this.next;
 };
@@ -36,7 +36,6 @@ var Menu = function() {
 	this.element = document.createElement('div');//just a container for the menu options
 	this.element.classList.add('menuContainer');
 };
-Object.seal(Menu);
 
 Menu.prototype.display = function() {
     this.options.forEach(function(el, i) {
@@ -76,17 +75,23 @@ function setupUI() {
     var menu = new Menu();
 	menu.options = [ 
 		new TextBox('Cody'), 
-		new TextBox('JAJ') 
+		new TextBox('Eat') 
 	];
+    
+    var amazing = new TextBox('AMAAAAZING');
+    amazing.event = function() { this.element.innerHTML += '<br/>It cody!!!1!'; };
 	menu.options[0].next = menu.createTextBoxChain([ 
-		new TextBox('is'), new TextBox('AMAAAAZING') 
+		new TextBox('is'), amazing 
 	]);
+    var cubeBox = new TextBox('spinning cubes.');
+    cubeBox.event = basicCube; 
 	menu.options[1].next = menu.createTextBoxChain([ 
-		new TextBox('is pretty much'), new TextBox('A TERRIBLE TEACHER'), 
-		new TextBox('but'), new TextBox('he tries')
+		new TextBox('lots'), new TextBox('of'), 
+		cubeBox, new TextBox('Aren\'t they neat?')
 	]);
 	menu.options.forEach(function(el, i) { 
 		menu.options[i].menu = menu;
+        menu.options[i].event = clear;
 		menu.options[i].element = createTextBoxElement(true);
 		menu.options[i].element.onclick = menu.options[i].progress.bind(menu.options[i]);
 		menu.options[i].display();
