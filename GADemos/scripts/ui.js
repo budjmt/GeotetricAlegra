@@ -1,14 +1,15 @@
 "use strict";
 
+var container;
 var textBoxes = [];
 var menus = [];
 
 var TextBox = function(text) {
     this.text = text;
+	this.menu = undefined;
     this.next = undefined;
     this.element = undefined;
     this.event = undefined;
-    this.onclick = this.progress;
 };
 Object.seal(TextBox);
 
@@ -23,26 +24,30 @@ TextBox.prototype.hide = function() {
 }
 
 TextBox.prototype.progress = function() {
-    this.hide();
+    if(this.menu) this.menu.hide();
+	else this.hide();
+	this.next.element.onclick = this.next.progress ? this.next.progress.bind(this.next) : undefined;
     this.next.display();
     return this.next;
 };
 
 var Menu = function() {
-    this.textBoxes = [];
+    this.options = [];//options are textboxes
+	this.element = document.createElement('div');//just a container for the menu options
+	this.element.classList.add('menuContainer');
 };
 Object.seal(Menu);
 
 Menu.prototype.display = function() {
-    this.textBoxes.forEach(function(el, i) {
-        this.textBoxes[i].display();
-    });
+    this.options.forEach(function(el, i) {
+        setTimeout(function() { this.options[i].display() }.bind(this), i * 100);
+    }.bind(this));
 };
 
 Menu.prototype.hide = function() {
-    this.textBoxes.forEach(function(el, i) {
-        this.textBoxes[i].hide();
-    });
+    this.options.forEach(function(el, i) {
+		setTimeout(function() { this.options[i].hide() }.bind(this), i * 100);
+    }.bind(this));
 };
 
 //set the value of next for the menu item whose result you want to be this chain 
@@ -53,19 +58,53 @@ Menu.prototype.createTextBoxChain = function(textBoxChain) {
         textBoxChain[i].next = textBoxChain[i + 1]; 
     });
     textBoxChain[textBoxChain.length - 1].next = this;
-    return textBoxes[0];
+    return textBoxChain[0];
 };
 
-function createTextBoxElement() {
+function createTextBoxElement(visible) {
     var box = document.createElement('div');
     box.classList.add('textBox');
+	!visible && box.classList.add('hidden');
     return box;
 }
 
 function setupUI() {
     //create the elements for the textbox chains
-    textBoxes[0] = createTextBoxElement(); 
-    textBoxes[1] = createTextBoxElement();
+    textBoxes[0] = createTextBoxElement(false); 
+    textBoxes[1] = createTextBoxElement(false);
     
-    var menu = new Menu(); 
+    var menu = new Menu();
+	menu.options = [ 
+		new TextBox('Cody'), 
+		new TextBox('JAJ') 
+	];
+	menu.options[0].next = menu.createTextBoxChain([ 
+		new TextBox('is'), new TextBox('AMAAAAZING') 
+	]);
+	menu.options[1].next = menu.createTextBoxChain([ 
+		new TextBox('is pretty much'), new TextBox('A TERRIBLE TEACHER'), 
+		new TextBox('but'), new TextBox('he tries')
+	]);
+	menu.options.forEach(function(el, i) { 
+		menu.options[i].menu = menu;
+		menu.options[i].element = createTextBoxElement(true);
+		menu.options[i].element.onclick = menu.options[i].progress.bind(menu.options[i]);
+		menu.options[i].display();
+	});
+	
+	menus.push(menu);
+	
+	container.appendChild(textBoxes[0]);
+	container.appendChild(textBoxes[1]);
+	menus.forEach(function(menuEl, i) {
+		container.appendChild(menuEl.element);
+		menuEl.options.forEach(function(boxEl, i) {
+			menuEl.element.appendChild(boxEl.element);
+		});
+	});
 }
+
+window.addEventListener('load', function() {
+	container = document.getElementById('pop_ups');
+	setupUI();
+});
