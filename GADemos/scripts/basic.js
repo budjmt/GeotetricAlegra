@@ -4,6 +4,7 @@ if ( !Detector.webgl ) Detector.addGetWebGLMessage();
 var Scene = function() {
     this.scene = undefined;
     this.update = undefined;
+    this.reset = undefined;
 };
 
 var canvas;

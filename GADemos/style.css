@@ -4,8 +4,8 @@ html, body {
 	margin: 0px;
 }
 
-sub { margin-top:  15px; line-height: 0px; font-size: 60%; }
-sup { margin-top: -15px; line-height: 0px; font-size: 60%; }
+sub { vertical-align: sub;   line-height: 0px; font-size: 60%; }
+sup { vertical-align: super; line-height: 0px; font-size: 60%; }
 
 canvas {
 	position: absolute;

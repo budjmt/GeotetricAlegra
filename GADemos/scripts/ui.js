@@ -13,7 +13,7 @@ var TextBox = function(text, event) {
 };
 
 TextBox.prototype.display = function() {
-    this.element.innerHTML = this.text;
+    this.element.innerHTML = '<p>' + this.text + '</p>';
     this.element.classList.remove('hidden');
     this.event && this.event();
 };
@@ -75,7 +75,7 @@ function setupUI() {
     var menu = new Menu();
 	menu.options = [ 
 		new TextBox('Cody'), 
-		new TextBox('Eat'), 
+		new TextBox('Land'), 
 		new TextBox('Geometric Algebra Basics')
 	];
     
@@ -83,8 +83,7 @@ function setupUI() {
 		new TextBox('is'), new TextBox('AMAAAAZING', cody)
 	]);
 	menu.options[1].next = menu.createTextBoxChain([ 
-		new TextBox('lots'), new TextBox('of'), 
-		new TextBox('spinning cubes.', basicCube), new TextBox('Aren\'t they neat?')
+		new TextBox('of'), new TextBox('spinning cubes.', basicCube), new TextBox('Aren\'t they neat?')
 	]);
 	
 	menu.options[2].next = menu.createTextBoxChain([
@@ -96,16 +95,36 @@ function setupUI() {
 					'myriad geometric concepts all in one uniform way.'),
 		new TextBox('This is a basis axis, which we\'ll call e<sub>1</sub>.', e1), 
 		new TextBox('It represents a unit vector in the direction ' +
-					'of one of our axes, which is&nbsp;<b>x</b>&nbsp;in this case.'),
+					'of one of our axes, which is <b>x</b> in this case.'),
 		new TextBox('The reason it\'s spinning around is to make the point that it ' +
 					'doesn\'t have to point in any particular direction, ' +
 					'even though we identify it with x'),
 		new TextBox('If we were working in 1D this would be our only axis, but we can go further.'),
-		new TextBox('Here is the next basis vector for 2D, which we\'ll call e<sub>2</sub>&nbsp;' +
-					'or&nbsp;<b>y</b>, marked in blue', e2),
-		new TextBox('And here, in green, is&nbsp;<b>z</b>, or e<sub>3</sub>.', e3),
+		new TextBox('Here is the next basis vector for 2D, which we\'ll call e<sub>2</sub> ' +
+					'or <b>y</b>, marked in blue', e2),
+		new TextBox('And here, in green, is <b>z</b>, or e<sub>3</sub> for 3D.', e3),
+        new TextBox('The important thing to notice is that all of these vectors are co-perpendicular.'),
+        new TextBox('Going above the 3rd dimension, our basis axes are still considered to be "co-perpendicular", ' +
+                    'but in a way that we can\'t perceive.'),
+        new TextBox('Geometric Algebra allows for well-defined N-dimensional geometry, as seen in the game Miegakure.'), 
+        new TextBox('This differs from linear algebra which works best in 3D ' +
+                    'and below and has limited effectiveness above that.'),
 		new TextBox('One interesting thing about geometric algebra is that its rules also ' +
-					'apply to scalars, aka numbers.')
+					'apply to scalars, aka numbers.'),
+        new TextBox('We treat them as 0-dimensional objects, which don\'t have ' + 
+                    'a concrete geometric representation.'),
+        new TextBox('This is because of how objects are conceptualized.'),
+        new TextBox('An N-dimensional construct in GA is an <b>n-vector</b>.'),
+        new TextBox('We have more specific terms for the lower dimensions: '),
+        new TextBox('0D: scalars, 1D: vectors...'),
+        new TextBox('In 2D, we have <b>bivectors</b> (which are similar to planes), ' +
+                    'and in 3D we have <b>trivectors</b> (which are similar to volumes)...'),
+        new TextBox('After that, we don\'t have any specific terms and just fall back on n-vector.'),
+        new TextBox('GA objects are often combinations of the various n-vectors; ' +
+                    'a generic GA object consisting of any number of n-vectors is a <b>multivector</b>.'),
+        new TextBox('So what actually are bi and trivectors?', clear),
+        new TextBox('Here\'s a demonstration of the outer product between e<sub>1</sub> and e<sub>2</sub>, ' + 
+                    'which creates the bivector e<sub>12</sub>.', outerProduct)
 	]);
 	
 	menu.options.forEach(function(el, i) { 

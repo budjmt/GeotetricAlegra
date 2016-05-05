@@ -1,6 +1,9 @@
 function lerp(a,b,t) { return a * (1 - t) + b * t; }
+function clamp(val,min,max) { (val > max && (val = max)) || (val < min && (val = min)); return val; }
 
 function clear() {
+    scene.reset && scene.reset();
+    camera.position.set(0,0,5);
     scene = baseScene;
 }
 
@@ -13,7 +16,6 @@ function cubeSetup() {
             emissive: 0x553333
         })
     );
-    cube.rotation.set(10,45,0);
     
     var light = new THREE.DirectionalLight(0xffffff,1.0);
     light.position.set(1,2,3);
@@ -28,6 +30,8 @@ function cubeSetup() {
 	//var boundingBox = new THREE.Box3();
     var s = new Scene();
     s.scene = cubeS;
+    s.reset = function() { cube.position.set(0,0,0); cube.rotation.set(10,45,0); };
+    s.reset();
     s.update = function(dt) {
         cube.rotation.y -= 0.5 * dt;
 		var mousePoint = mouseWorldCoords(cube.position.z);
@@ -85,7 +89,8 @@ var arrows;
 var spinArrows;
 function e1Setup() {
 	var e1S = new THREE.Scene();
-	var l = 0.2;
+    var startLen = 0.2;
+	var l = startLen;
 	arrows = new THREE.Object3D();
 	arrows.add(new THREE.ArrowHelper(
 		new THREE.Vector3(1,0,0).normalize(),
@@ -100,21 +105,33 @@ function e1Setup() {
 		arrows.rotation.y += 0.5 * dt;
 	};
 	
-	var s = new Scene();
-	s.scene = e1S;
-	s.update = function(dt) {
+    var updateFunc = function(dt) {
 		if(l < 1) {
 			l = lerp(l, 1.1, 0.1);
 			arrows.children[0].setLength(l,0.2,0.15);
 		}
 		else s.update = spinArrows;
-	}
+	};
+    
+	var s = new Scene();
+	s.scene = e1S;
+    s.reset = function() { 
+        for(var i = arrows.children.length - 1; i > 0; i--)
+            arrows.remove(arrows.children[i]);
+        arrows.rotation.set(0,0,0); 
+        l = startLen;
+        arrows.children[0].setLength(l);
+        arrows.children[0].setColor(0x222222); 
+        s.update = updateFunc; 
+    };
+	s.update = updateFunc; 
 	return s;
 }
 
 var e1Scene = e1Setup();
 function e1() { scene = e1Scene; }
 
+//intended to follow e1
 function e2() {
 	var l = 0.2;
 	arrows.add(new THREE.ArrowHelper(
@@ -134,6 +151,7 @@ function e2() {
 	}
 }
 
+//intended to follow e2
 function e3() {
 	var l = 0.2;
 	arrows.add(new THREE.ArrowHelper(
@@ -151,3 +169,76 @@ function e3() {
 		else scene.update = spinArrows;
 	}
 }
+
+function outerProductSetup() {
+    var outerS = new THREE.Scene();
+    var startScale = 0.1;
+	var scale = startScale;
+	var axes = new THREE.Object3D();
+	axes.add( new THREE.ArrowHelper( new THREE.Vector3(1,0,0).normalize(), new THREE.Vector3(0,0,0), 1, 0xaa0000, 0.2, 0.15 ) );
+    axes.add( new THREE.ArrowHelper( new THREE.Vector3(0,1,0).normalize(), new THREE.Vector3(0,0,0), 1, 0x0000aa, 0.2, 0.15 ) );
+    
+    var plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 1, 1, 5 ), new THREE.MeshBasicMaterial( { color: 0xffeeee, opacity: 0.5, transparent: true } ) );
+    plane.position.x = 0.5;
+    plane.scale.y = 0.001;
+    axes.add(plane);
+	outerS.add(axes);
+    
+    var mouseSlide = function(dt) {
+        var y = axes.children[0].position.y;
+            var mousePoint = mouseWorldCoords(axes.children[0].position.z);
+            var segment = new THREE.Vector3(0,axes.children[0].scale.y,0);
+            var len = segment.y; 
+            segment.applyEuler(axes.children[0].rotation);
+            var start   = new THREE.Vector3().copy(axes.children[0].position);
+            var toMouse = new THREE.Vector3().copy(mousePoint).sub(start);
+            var t = clamp(toMouse.dot(segment), 0, 1) / (len * len);
+            segment.multiplyScalar(t).add(start);
+            var distSq = segment.distanceToSquared(mousePoint);
+            if(distSq < 0.85) {
+                if(uniforms.mouseDown) {
+                    axes.children[0].position.y = clamp(lerp(y, mousePoint.y, Math.min(2 * dt, 1)), 0, 1);
+                    document.body.style.cursor = "grabbing";
+                    document.body.style.cursor = "-webkit-grabbing";
+                }
+                else {
+                    axes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
+                    document.body.style.cursor = "grab";
+                    document.body.style.cursor = "-webkit-grab";
+                }
+            }
+        else {
+            axes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
+            document.body.style.cursor = "default";
+        }
+        //scale and position the plane so that it fits properly
+        plane.scale.y = axes.children[0].position.y || 0.001;
+        plane.position.y = axes.children[0].position.y * 0.5;
+    };
+    
+    var updateFunc = function(dt) {
+        camera.position.x = 0.35;
+        camera.position.z = 2;
+		if(scale < 1) {
+			scale = lerp(scale, 1.1, 0.1);
+			axes.scale.set(scale,scale,scale);
+		}
+		else s.update = mouseSlide;
+	};
+    
+	var s = new Scene();
+	s.scene = outerS;
+    s.reset = function() { 
+        scale = startScale;
+        axes.scale.set(scale,scale,scale);
+        axes.children[0].position.y = 0;
+        plane.position.y = 0;
+        plane.scale.y = 0.001; 
+        s.update = updateFunc; 
+    };
+	s.update = updateFunc;
+	return s;
+}
+
+var outerProductScene = outerProductSetup();
+function outerProduct() { scene = outerProductScene; }
