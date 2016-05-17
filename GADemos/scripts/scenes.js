@@ -171,112 +171,60 @@ function e3() {
 	}
 }
 
-var opPlane;
+var opPlane, opAxes;
 function outerProductSetup() {
     var outerS = new THREE.Scene();
     var startScale = 0.1;
 	var scale = startScale;
-	var axes = new THREE.Object3D();
-	axes.add( new THREE.ArrowHelper( new THREE.Vector3(1,0,0).normalize(), new THREE.Vector3(0,0,0), 1, 0xaa0000, 0.2, 0.15 ) );
-    axes.add( new THREE.ArrowHelper( new THREE.Vector3(0,1,0).normalize(), new THREE.Vector3(0,0,0), 1, 0x0000aa, 0.2, 0.15 ) );
+	opAxes = new THREE.Object3D();
+	opAxes.add( new THREE.ArrowHelper( new THREE.Vector3(1,0,0).normalize(), new THREE.Vector3(0,0,0), 1, 0xaa0000, 0.2, 0.15 ) );
+    opAxes.add( new THREE.ArrowHelper( new THREE.Vector3(0,1,0).normalize(), new THREE.Vector3(0,0,0), 1, 0x0000aa, 0.2, 0.15 ) );
     
-    var opPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 1, 1, 5 ), new THREE.MeshBasicMaterial( { color: 0xffeeee, opacity: 0.5, transparent: true } ) );
+    opPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 1, 1, 5 ), 
+	new THREE.MeshBasicMaterial( { color: 0xffeeee, opacity: 0.5, transparent: true } ) );
     opPlane.position.x = 0.5;
     opPlane.scale.y = 0.001;
-    axes.add(opPlane);
-	outerS.add(axes);
+    opAxes.add(opPlane);
+	outerS.add(opAxes);
     
     var mouseSlide = function(dt) {
-        var y = axes.children[0].position.y;
-            var mousePoint = mouseWorldCoords(axes.children[0].position.z);
-            var segment = new THREE.Vector3(0,axes.children[0].scale.y,0);
+        var y = opAxes.children[0].position.y;
+            var mousePoint = mouseWorldCoords(opAxes.children[0].position.z);
+            var segment = new THREE.Vector3(0,opAxes.children[0].scale.y,0);
             var len = segment.y; 
-            segment.applyEuler(axes.children[0].rotation);
-            var start   = new THREE.Vector3().copy(axes.children[0].position);
+            segment.applyEuler(opAxes.children[0].rotation);
+            var start   = new THREE.Vector3().copy(opAxes.children[0].position);
             var toMouse = new THREE.Vector3().copy(mousePoint).sub(start);
             var t = clamp(toMouse.dot(segment), 0, 1) / (len * len);
             segment.multiplyScalar(t).add(start);
             var distSq = segment.distanceToSquared(mousePoint);
             if(distSq < 0.85) {
                 if(uniforms.mouseDown) {
-                    axes.children[0].position.y = clamp(lerp(y, mousePoint.y, Math.min(2 * dt, 1)), 0, 1);
+                    opAxes.children[0].position.y = clamp(lerp(y, mousePoint.y, Math.min(2 * dt, 1)), 0, 1);
                     document.body.style.cursor = "grabbing";
                     document.body.style.cursor = "-webkit-grabbing";
                 }
                 else {
-                    axes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
+                    opAxes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
                     document.body.style.cursor = "grab";
                     document.body.style.cursor = "-webkit-grab";
                 }
             }
         else {
-            axes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
+            opAxes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
             document.body.style.cursor = "default";
         }
         //scale and position the plane so that it fits properly
-        opPlane.scale.y = axes.children[0].position.y || 0.001;
-        opPlane.position.y = axes.children[0].position.y * 0.5;
+        opPlane.scale.y = opAxes.children[0].position.y || 0.001;
+        opPlane.position.y = opAxes.children[0].position.y * 0.5;
     };
     
-	scene.update = function(dt) {
+	var updateFunc = function(dt) {
         camera.position.x = 0.35;
         camera.position.z = 2;
 		if(scale < 1) {
 			scale = lerp(scale, 1.1, 0.1);
-			axes.scale.set(scale,scale,scale);
-		}
-		else s.update = mouseSlide;
-	};
-}
-
-var outerProductScene = outerProductSetup();
-function outerProduct() { scene = outerProductScene; }
-
-//intended to follow outerProduct
-function outerProduct3D() {
-     var outerS = new THREE.Scene();
-    var startScale = 0.1;
-	var scale = startScale;
-	var axes = new THREE.Object3D();
-    axes.add( new THREE.ArrowHelper( new THREE.Vector3(0,0,1).normalize(), new THREE.Vector3(0,0,0), 1, 0x00aa55, 0.2, 0.15 ) );
-    
-    var box = new THREE.Mesh( new THREE.BoxBufferGeometry( 1, 1, 1, 5 ), new THREE.MeshBasicMaterial( { color: 0xffeeee, opacity: 0.5, transparent: true } ) );
-    box.position.x = 0.5;
-    box.position.z = 0.5;
-    box.scale.z = 0.001;
-    axes.add(box);
-    
-    var mouseSlide = function(dt) {
-        var y = axes.children[0].position.z;
-            var mouseCast = mouseCast(opPlane);
-            if(mouseCast.length) {
-                var mousePoint = mouseCast[0].point;
-                if(uniforms.mouseDown) {
-                    axes.children[0].position.y = clamp(lerp(y, mousePoint.y, Math.min(2 * dt, 1)), 0, 1);
-                    document.body.style.cursor = "grabbing";
-                    document.body.style.cursor = "-webkit-grabbing";
-                }
-                else {
-                    axes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
-                    document.body.style.cursor = "grab";
-                    document.body.style.cursor = "-webkit-grab";
-                }
-            }
-        else {
-            axes.children[0].position.y = Math.max(lerp(y, y - 0.2, Math.min(2 * dt, 1)), 0);
-            document.body.style.cursor = "default";
-        }
-        //scale and position the plane so that it fits properly
-        plane.scale.y = axes.children[0].position.y || 0.001;
-        plane.position.y = axes.children[0].position.y * 0.5;
-    };
-    
-    var updateFunc = function(dt) {
-        camera.position.x = 0.35;
-        camera.position.z = 2;
-		if(scale < 1) {
-			scale = lerp(scale, 1.1, 0.1);
-			axes.scale.set(scale,scale,scale);
+			opAxes.scale.set(scale,scale,scale);
 		}
 		else s.update = mouseSlide;
 	};
@@ -285,11 +233,83 @@ function outerProduct3D() {
 	s.scene = outerS;
     s.reset = function() { 
         scale = startScale;
-        axes.scale.set(scale,scale,scale);
-        axes.children[0].position.y = 0;
-        plane.position.y = 0;
-        plane.scale.y = 0.001; 
+        opAxes.scale.set(scale,scale,scale);
+        opAxes.children[0].position.y = 0;
+		while(opAxes.children.length > 3)
+			opAxes.remove(opAxes.children[3]);
+        opPlane.position.y = 0;
+        opPlane.scale.y = 0.001; 
         s.update = updateFunc; 
     };
 	s.update = updateFunc;
+	return s;
+}
+
+var outerProductScene = outerProductSetup();
+function outerProduct() { scene = outerProductScene; }
+
+//intended to follow outerProduct
+function outerProduct3D() {
+    opAxes.add( new THREE.ArrowHelper( new THREE.Vector3(0,0,1).normalize(), new THREE.Vector3(0,0,0), 1, 0x00aa55, 0.2, 0.15 ) );
+    
+    var box = new THREE.Mesh( new THREE.BoxBufferGeometry( 1, 1, 1, 5 ), 
+		new THREE.MeshBasicMaterial( { color: 0xeeeeff, opacity: 0.5, transparent: true } ) );
+    box.position.set(0.5,0.5,0);
+    box.scale.z = 0.001;
+    opAxes.add(box);
+    
+    var mouseSlide = function(dt) {
+        var z = opPlane.position.z;
+            var mouseCastLocs = mouseCast(opPlane);
+            if(mouseCastLocs.length) {
+                var mousePoint = mouseCastLocs[0].point;
+                if(uniforms.mouseDown) {
+					var disp = mousePoint.clone().sub(opPlane.position);
+					disp = disp.length();
+					disp *= Math.floor(mousePoint.x < opPlane.position.x) * 2 - 1;
+                    opAxes.children[0].position.z = clamp(lerp(z, z + disp, Math.min(2 * dt, 1)), 0, 1);
+					opAxes.children[1].position.z = opAxes.children[0].position.z;
+					opPlane.position.z = opAxes.children[0].position.z;
+                    document.body.style.cursor = "grabbing";
+                    document.body.style.cursor = "-webkit-grabbing";
+                }
+                else {
+                    opAxes.children[0].position.z = Math.max(lerp(z, z - 0.2, Math.min(2 * dt, 1)), 0);
+					opAxes.children[1].position.z = opAxes.children[0].position.z;
+					opPlane.position.z = opAxes.children[0].position.z;
+                    document.body.style.cursor = "grab";
+                    document.body.style.cursor = "-webkit-grab";
+                }
+            }
+        else {
+            opAxes.children[0].position.z = Math.max(lerp(z, z - 0.2, Math.min(2 * dt, 1)), 0);
+			opAxes.children[1].position.z = opAxes.children[0].position.z;
+			opPlane.position.z = opAxes.children[0].position.z;
+            document.body.style.cursor = "default";
+        }
+        //scale and position the box so that it fits properly
+        box.scale.z    = opAxes.children[0].position.z || 0.001;
+        box.position.z = opAxes.children[0].position.z * 0.5;
+    };
+    
+	var endRot = new THREE.Quaternion(); 
+	endRot.setFromAxisAngle(new THREE.Vector3(0,1,0).normalize(), Math.PI / 4);
+	var endPos = new THREE.Vector3(0, 0, 4).applyQuaternion(endRot);
+	endPos.y = 0.2;
+	scene.update = function(dt) {
+		if(Math.abs(camera.position.z - endPos.z) > 0.1 ){
+		  //|| Math.abs(camera.quaternion.w - endRot.w) > 0.1) {
+			camera.position.lerp(endPos, 0.1);
+			camera.quaternion.slerp(endRot, 0.1);
+		}
+		else 
+			scene.update = function(dt) {
+			if(opAxes.children[0].position.y < 1) {
+				opAxes.children[0].position.y = lerp(opAxes.children[0].position.y, 1.1, 0.1);
+				opPlane.scale.y    = opAxes.children[0].position.y || 0.001;
+				opPlane.position.y = opAxes.children[0].position.y * 0.5;
+			}
+			else scene.update = mouseSlide;
+		};
+	};
 }

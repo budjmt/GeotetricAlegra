@@ -128,7 +128,11 @@ function setupUI() {
         
         new TextBox('So what actually are bi and trivectors?', clear),
         new TextBox('Here\'s a demonstration of the outer product between e<sub>1</sub> and e<sub>2</sub>, ' + 
-                    'which creates the bivector e<sub>12</sub>.', outerProduct)
+                    'which creates the bivector e<sub>12</sub>.', outerProduct),
+		'You can see the <em>sweeping</em> effect of the outer product, where one vector is ' +
+		'swept across another',
+		new TextBox('Similarly, for the wedge product of e<sub>12</sub> and e<sub>3</sub>, we ' +
+		'sweep a bivector along a vector to create a trivector.', outerProduct3D)
 	]);
 	
 	menu.options.forEach(function(el, i) { 
